@@ -1,0 +1,2547 @@
+{
+  "name": "automation plumbing and electrician  final",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "website-booking",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "bb939071-280f-4a63-8e60-12423835a0b4",
+      "name": "Website Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        192
+      ],
+      "webhookId": "website-booking-webhook",
+      "notes": "Receives booking data from website form (Name, Phone, Email, Service Type, Date, Time, Problem Description)"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "customer_name",
+              "value": "={{ $json.body.name }}"
+            },
+            {
+              "name": "customer_phone",
+              "value": "={{ $json.body.phone }}"
+            },
+            {
+              "name": "customer_email",
+              "value": "={{ $json.body.email }}"
+            },
+            {
+              "name": "service_type",
+              "value": "={{ $json.body.serviceType }}"
+            },
+            {
+              "name": "preferred_date",
+              "value": "={{ $json.body.date }}"
+            },
+            {
+              "name": "preferred_time",
+              "value": "={{ $json.body.time }}"
+            },
+            {
+              "name": "problem_description",
+              "value": "={{ $json.body.problem }}"
+            },
+            {
+              "name": "booking_id",
+              "value": "={{ 'BK-' + $now.format('yyyyMMddHHmmss') }}"
+            },
+            {
+              "name": "booking_date",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+            },
+            {
+              "name": "status",
+              "value": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "507f5ad5-7f71-4ebf-b2bb-57a80e873bb8",
+      "name": "Format Booking Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        -1024,
+        192
+      ],
+      "notes": "Clean and format the incoming data, add booking ID and timestamp"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Booking received successfully!\", \"booking_id\": $json.booking_id } }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              }
+            ]
+          }
+        }
+      },
+      "id": "651f96c6-98ae-44c7-9ac3-12d302528351",
+      "name": "Send Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        192
+      ],
+      "notes": "Return success message to website form"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customer_email }}",
+        "subject": "=Booking Confirmation - {{ $json.booking_id }}",
+        "message": "=<!DOCTYPE html> <html> <head><meta charset=\"UTF-8\"></head> <body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4\"> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:20px\"> <tr><td align=\"center\"> <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)\"> <tr><td style=\"background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;text-align:center\"> <h1 style=\"color:#fff;margin:0;font-size:28px\">✅ Booking Confirmed!</h1> </td></tr> <tr><td style=\"padding:30px\"> <h2 style=\"color:#333;margin-top:0\">Dear {{ $json.customer_name }},</h2> <p style=\"color:#666;font-size:16px;line-height:1.6\">Thank you for choosing Expert Services! Your booking has been confirmed successfully.</p> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f8f9fa;border-radius:8px;margin:20px 0;border:2px solid #667eea\"> <tr><td style=\"padding:20px\"> <h3 style=\"color:#667eea;margin-top:0;margin-bottom:15px\">📋 Booking Details</h3> <table width=\"100%\" cellpadding=\"8\" cellspacing=\"0\"> <tr><td style=\"color:#333;font-weight:bold;width:40%\">Booking ID:</td><td style=\"color:#666\">{{ $json.booking_id }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Service Type:</td><td style=\"color:#666\">{{ $json.service_type }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Preferred Date:</td><td style=\"color:#666\">{{ $json.preferred_date }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Preferred Time:</td><td style=\"color:#666\">{{ $json.preferred_time }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Contact Phone:</td><td style=\"color:#666\">{{ $json.customer_phone }}</td></tr> </table> <div style=\"margin-top:15px;padding:15px;background:#fff3cd;border-radius:5px;border-left:4px solid #ffc107\"> <p style=\"margin:0;color:#856404;font-size:14px\"><strong>Problem Description:</strong><br>{{ $json.problem_description }}</p> </div> </td></tr></table> <div style=\"background:#d1f2eb;padding:20px;border-radius:8px;margin:20px 0;border-left:4px solid #10b981\"> <h4 style=\"color:#0e6655;margin-top:0\">📞 What's Next?</h4> <p style=\"color:#0e6655;margin:10px 0;line-height:1.6\">• Our team will contact you within 30 minutes<br>• Please keep your phone handy<br>• A reminder will be sent 24 hours before appointment</p> </div> <p style=\"color:#666;font-size:16px;line-height:1.6;margin-top:20px\">If you need to reschedule, please contact us.</p> </td></tr> <tr><td style=\"background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #dee2e6\"> <p style=\"margin:0;color:#666;font-size:14px\"><strong>Expert Services</strong><br>📞 +92 312 5798482 | ✉️ info@expertservices.com</p> <p style=\"margin:10px 0 0 0;color:#999;font-size:12px\">Thank you for choosing us!</p> </td></tr> </table> </td></tr></table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        0
+      ],
+      "id": "4d2ba219-fb6a-4730-b06f-416d42599ff7",
+      "name": "Send Customer Confirmation Email1",
+      "webhookId": "3e7ca4be-5926-4146-ae36-45c3000b83c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=arfeenhashmi75@gmail.com",
+        "subject": "=🔔 New Booking Alert - {{ $json.booking_id }}",
+        "message": "=<!DOCTYPE html> <html> <head><meta charset=\"UTF-8\"></head> <body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4\"> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:20px\"> <tr><td align=\"center\"> <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)\"> <tr><td style=\"background:linear-gradient(135deg,#f97316 0%,#dc2626 100%);padding:30px;text-align:center\"> <h1 style=\"color:#fff;margin:0;font-size:28px\">🔔 New Booking Alert!</h1> </td></tr> <tr><td style=\"padding:30px\"> <p style=\"color:#666;font-size:16px\">A new booking has been received from the <strong>Website</strong>.</p> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff3cd;border-radius:8px;margin:20px 0;border:2px solid #ffc107\"> <tr><td style=\"padding:20px\"> <h3 style=\"color:#856404;margin-top:0;margin-bottom:15px\">👤 Customer Details</h3> <table width=\"100%\" cellpadding=\"8\" cellspacing=\"0\"> <tr><td style=\"color:#333;font-weight:bold;width:35%\">Booking ID:</td><td style=\"color:#666;font-family:monospace\">{{ $json.booking_id }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Name:</td><td style=\"color:#666\">{{ $json.customer_name }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Phone:</td><td style=\"color:#666\">{{ $json.customer_phone }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Email:</td><td style=\"color:#666\">{{ $json.customer_email }}</td></tr> </table> </td></tr></table> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#dbeafe;border-radius:8px;margin:20px 0;border:2px solid #3b82f6\"> <tr><td style=\"padding:20px\"> <h3 style=\"color:#1e40af;margin-top:0;margin-bottom:15px\">🔧 Service Information</h3> <table width=\"100%\" cellpadding=\"8\" cellspacing=\"0\"> <tr><td style=\"color:#333;font-weight:bold;width:35%\">Service Type:</td><td style=\"color:#666\">{{ $json.service_type }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Preferred Date:</td><td style=\"color:#666\">{{ $json.preferred_date }}</td></tr> <tr><td style=\"color:#333;font-weight:bold\">Preferred Time:</td><td style=\"color:#666\">{{ $json.preferred_time }}</td></tr> </table> <div style=\"margin-top:15px;padding:15px;background:#fff;border-radius:5px\"> <p style=\"margin:0;color:#333;font-size:14px\"><strong>Problem:</strong><br><span style=\"color:#666\">{{ $json.problem_description }}</span></p> </div> </td></tr></table> <div style=\"background:#fee2e2;padding:20px;border-radius:8px;border-left:4px solid #ef4444\"> <h4 style=\"color:#991b1b;margin-top:0\">⚠️ ACTION REQUIRED</h4> <p style=\"color:#991b1b;margin:0\">Please contact the customer within <strong>30 minutes</strong> to confirm the appointment.</p> </div> </td></tr> <tr><td style=\"background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #dee2e6\"> <p style=\"margin:0;color:#666;font-size:12px\">Received: {{ $json.booking_date }}<br>Source: Website<br>Automated Notification</p> </td></tr> </table> </td></tr></table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -576,
+        384
+      ],
+      "id": "f7cbf909-e748-45fa-a2bd-c5052a0a865a",
+      "name": "Send Admin Notification Email1",
+      "webhookId": "3e7ca4be-5926-4146-ae36-45c3000b83c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=0"
+        },
+        "dataMode": "autoMapInputData",
+        "options": {}
+      },
+      "id": "ef9fdbfe-168a-4661-9e9b-5a94de629a9d",
+      "name": "Save to Database (Google Sheets)1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        192
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Save booking details to Google Sheets database"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -800,
+        1536
+      ],
+      "id": "33d14e41-181d-4d97-bc26-84df0f04519e",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "fe67171d-4de0-4f14-a427-82fa9ad6fd9a",
+      "name": "Get All Bookings websites1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        1440
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Read all bookings from database"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1025053171,
+          "mode": "list",
+          "cachedResultName": "Booking whatsapp",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=1025053171"
+        },
+        "options": {}
+      },
+      "id": "9b22fa33-dbc3-4b2e-9c7b-68c8cac878b0",
+      "name": "Get All Bookings whatsapp2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        1632
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Read all bookings from database"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 18
+            }
+          ]
+        }
+      },
+      "id": "f6161111-f365-4dc3-becb-5f568df83968",
+      "name": "Schedule Trigger (6 PM Daily)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        1536
+      ],
+      "notes": "Runs every day at 6 PM to send reminders for next day bookings"
+    },
+    {
+      "parameters": {
+        "functionCode": "const tomorrow = new Date();\ntomorrow.setHours(0,0,0,0);\ntomorrow.setDate(tomorrow.getDate() + 1);\n\nreturn items.filter(item => {\n  const raw = item.json.preferred_date;\n  if (!raw) return false;\n\n  const parts = raw.toString().split('-');\n  if (parts.length !== 3) return false;\n\n  let day = parseInt(parts[0]);\n  let month = parseInt(parts[1]) - 1;\n  let year = parseInt(parts[2]);\n  if (year < 100) year += 2000;\n\n  const bookingDate = new Date(year, month, day);\n  bookingDate.setHours(0,0,0,0);\n\n  return bookingDate.getTime() === tomorrow.getTime();\n});"
+      },
+      "id": "4d9671a9-7ba2-40a2-bdd1-24adc42eccc8",
+      "name": "Filter Tomorrow's Bookings",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        1536
+      ],
+      "notes": "Filter bookings that are scheduled for tomorrow and still pending"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $input.all().length }}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "7421f8b1-a70c-46f3-9805-83c65fb39ae7",
+      "name": "Has Tomorrow Bookings?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -352,
+        1536
+      ],
+      "notes": "Check if there are any bookings tomorrow"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.customer_email }}",
+              "operation": "isNotEmpty"
+            }
+          ]
+        }
+      },
+      "id": "26cead97-de58-42c1-b847-5fba34b6ae14",
+      "name": "Has Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        1616
+      ],
+      "notes": "Check if customer provided email"
+    },
+    {
+      "parameters": {
+        "sendTo": "=arfeenhashmi75@gmail.com",
+        "subject": "=📅 Tomorrow's Booking Summary - {{ $now.format('YYYY-MM-DD') }}",
+        "message": "=<!DOCTYPE html> <html> <head><meta charset=\"UTF-8\"></head> <body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4\"> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:20px\"> <tr><td align=\"center\"> <table width=\"650\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)\"> <tr><td style=\"background:linear-gradient(135deg,#3b82f6 0%,#1e40af 100%);padding:30px;text-align:center\"> <h1 style=\"color:#fff;margin:0;font-size:28px\">📅 Tomorrow's Schedule</h1> <p style=\"color:#dbeafe;margin:10px 0 0 0;font-size:16px\">Appointment Summary</p> </td></tr> <tr><td style=\"padding:30px\"> <p style=\"color:#666;font-size:16px\">Summary of all appointments scheduled for tomorrow.</p> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:20px 0\"> <tr> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:#dbeafe;padding:20px;border-radius:8px;text-align:center;border:2px solid #3b82f6\"> <div style=\"font-size:36px;font-weight:bold;color:#1e40af;margin-bottom:5px\">{{ $json.total_count || '5' }}</div> <div style=\"color:#1e3a8a;font-size:14px\">Total Bookings</div> </div> </td> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:#ddd6fe;padding:20px;border-radius:8px;text-align:center;border:2px solid #8b5cf6\"> <div style=\"font-size:36px;font-weight:bold;color:#6b21a8;margin-bottom:5px\">{{ $json.plumbing_count || '3' }}</div> <div style=\"color:#5b21b6;font-size:14px\">Plumbing</div> </div> </td> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:#fef3c7;padding:20px;border-radius:8px;text-align:center;border:2px solid #f59e0b\"> <div style=\"font-size:36px;font-weight:bold;color:#92400e;margin-bottom:5px\">{{ $json.electrical_count || '2' }}</div> <div style=\"color:#78350f;font-size:14px\">Electrical</div> </div> </td> </tr> </table> <h3 style=\"color:#1e40af;margin-top:30px;margin-bottom:15px\">📋 Sample Appointments:</h3> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;margin:20px 0\"> <thead> <tr style=\"background:#3b82f6\"> <th style=\"padding:12px;text-align:left;color:#fff;font-size:14px;border:1px solid #2563eb\">Time</th> <th style=\"padding:12px;text-align:left;color:#fff;font-size:14px;border:1px solid #2563eb\">Customer</th> <th style=\"padding:12px;text-align:left;color:#fff;font-size:14px;border:1px solid #2563eb\">Phone</th> <th style=\"padding:12px;text-align:left;color:#fff;font-size:14px;border:1px solid #2563eb\">Service</th> </tr> </thead> <tbody> <tr style=\"background:#f8f9fa\"> <td style=\"padding:12px;border:1px solid #dee2e6;color:#333;font-weight:bold\">10:00 AM</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">Ali Ahmed</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">+92 300 1234567</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">Plumbing</td> </tr> <tr> <td style=\"padding:12px;border:1px solid #dee2e6;color:#333;font-weight:bold\">02:00 PM</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">Hassan Khan</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">+92 321 7654321</td> <td style=\"padding:12px;border:1px solid #dee2e6;color:#666\">Electrical</td> </tr> </tbody> </table> <p style=\"color:#999;font-size:13px;font-style:italic;margin-top:10px\">Note: Actual data will populate from your database.</p> <div style=\"background:#fef3c7;padding:20px;border-radius:8px;margin:25px 0;border-left:4px solid #f59e0b\"> <h4 style=\"color:#92400e;margin-top:0\">🔔 Action Required:</h4> <p style=\"color:#92400e;margin:0\">• Ensure adequate technicians allocated<br>• Review parts/tools needed<br>• Plan optimal routes<br>• Prepare special equipment</p> </div> </td></tr> <tr><td style=\"background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #dee2e6\"> <p style=\"margin:0;color:#666;font-size:12px\">Automated Daily Summary | Expert Services</p> </td></tr> </table> </td></tr></table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        320,
+        1536
+      ],
+      "id": "9e17c405-109b-4c05-9bf6-4a834303ee09",
+      "name": "Send Admin Summary1",
+      "webhookId": "3e7ca4be-5926-4146-ae36-45c3000b83c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.customer_email }}",
+        "subject": "=Your Service Appointment Tomorrow",
+        "message": "=<!DOCTYPE html> <html> <head><meta charset=\"UTF-8\"></head> <body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4\"> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:20px\"> <tr><td align=\"center\"> <table width=\"600\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 2px 4px rgba(0,0,0,0.1)\"> <tr><td style=\"background:linear-gradient(135deg,#10b981 0%,#059669 100%);padding:30px;text-align:center\"> <h1 style=\"color:#fff;margin:0;font-size:28px\">📅 Appointment Reminder</h1> </td></tr> <tr><td style=\"padding:30px\"> <h2 style=\"color:#333;margin-top:0\">Dear {{ $json.customer_name }},</h2> <p style=\"color:#666;font-size:16px;line-height:1.6\">This is a friendly reminder about your service appointment scheduled for <strong>tomorrow</strong>.</p> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#d1fae5;border-radius:8px;margin:25px 0;border:3px solid #10b981\"> <tr><td style=\"padding:25px\"> <h3 style=\"color:#065f46;margin-top:0;margin-bottom:20px;text-align:center;font-size:20px\">⏰ Appointment Details</h3> <table width=\"100%\" cellpadding=\"12\" cellspacing=\"0\"> <tr><td style=\"color:#333;font-weight:bold;font-size:16px;width:35%\">📆 Date:</td><td style=\"color:#065f46;font-size:18px;font-weight:bold\">{{ $json.preferred_date }}</td></tr> <tr><td style=\"color:#333;font-weight:bold;font-size:16px\">⏱️ Time:</td><td style=\"color:#065f46;font-size:18px;font-weight:bold\">{{ $json.preferred_time }}</td></tr> <tr><td style=\"color:#333;font-weight:bold;font-size:16px\">🔧 Service:</td><td style=\"color:#666;font-size:16px\">{{ $json.service_type }}</td></tr> <tr><td style=\"color:#333;font-weight:bold;font-size:16px\">🆔 Booking ID:</td><td style=\"color:#666;font-size:14px;font-family:monospace\">{{ $json.booking_id }}</td></tr> </table> </td></tr></table> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff7ed;border-radius:8px;margin:20px 0;border:2px solid #f97316\"> <tr><td style=\"padding:20px\"> <h4 style=\"color:#9a3412;margin-top:0\">⚡ Please Note:</h4> <ul style=\"color:#9a3412;line-height:2;margin:10px 0;padding-left:20px\"> <li>Our technician will arrive at scheduled time</li> <li>Please ensure someone is available</li> <li>Have your booking ID ready</li> <li>Keep work area accessible</li> </ul> </td></tr></table> <div style=\"background:#f8f9fa;padding:20px;border-radius:8px;text-align:center;margin:20px 0\"> <p style=\"color:#333;font-size:16px;margin:0 0 10px 0\"><strong>Need to reschedule?</strong></p> <p style=\"color:#666;font-size:18px;margin:0\">📞 Call: <a href=\"tel:+923125798482\" style=\"color:#f97316;text-decoration:none;font-weight:bold\">+92 312 5798482</a></p> </div> <p style=\"color:#666;font-size:16px;text-align:center;margin-top:25px\">We look forward to serving you tomorrow!</p> </td></tr> <tr><td style=\"background:#f8f9fa;padding:20px;text-align:center;border-top:1px solid #dee2e6\"> <p style=\"margin:0;color:#666;font-size:14px\"><strong>Expert Services</strong><br>📞 +92 312 5798482 | ✉️ info@expertservices.com</p> </td></tr> </table> </td></tr></table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        1616
+      ],
+      "id": "9c804874-f3e0-4984-9e01-88b639ea2c24",
+      "name": "Send Email Reminder1",
+      "webhookId": "3e7ca4be-5926-4146-ae36-45c3000b83c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Bookings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=0"
+        },
+        "options": {}
+      },
+      "id": "935527d1-4021-4d89-a4c0-519659668d98",
+      "name": "Get All Bookings website1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        1856
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Read complete bookings database"
+    },
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "mode": "everyWeek",
+              "hour": 9
+            }
+          ]
+        }
+      },
+      "id": "55a2a6c4-952c-4372-9776-66b7c945d5d1",
+      "name": "Schedule Trigger (Monday 9 AM)",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [
+        -1248,
+        2048
+      ],
+      "notes": "Runs every Monday at 9 AM to generate weekly report"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 812815951,
+          "mode": "list",
+          "cachedResultName": "Settings",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=812815951"
+        },
+        "options": {}
+      },
+      "id": "dde02b3b-ec6c-4e0e-838d-ddad3ba3c3c4",
+      "name": "Get WhatsApp FAQ Logs",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        2224
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Read WhatsApp FAQ interaction logs"
+    },
+    {
+      "parameters": {
+        "functionCode": "const today = new Date();\nconst weekAgo = new Date();\nweekAgo.setDate(weekAgo.getDate() - 7);\n\nconst bookings = $('Merge1').all();\n\nconst weekBookings = bookings.filter(item => {\n  const bookingDate = new Date(item.json.booking_date);\n  return bookingDate >= weekAgo && bookingDate <= today;\n});\n\nconst stats = {\n  total_bookings: weekBookings.length,\n  website_bookings: weekBookings.filter(b => b.json.source === 'website').length,\n  whatsapp_bookings: weekBookings.filter(b => b.json.source === 'whatsapp').length,\n  plumbing_bookings: weekBookings.filter(b => b.json.service_type === 'plumbing').length,\n  electrical_bookings: weekBookings.filter(b => b.json.service_type === 'electrical').length,\n  pending_bookings: weekBookings.filter(b => b.json.status === 'pending').length,\n  completed_bookings: weekBookings.filter(b => b.json.status === 'completed').length,\n  report_start: weekAgo.toISOString().split('T')[0],\n  report_end: today.toISOString().split('T')[0],\n  generated_at: today.toISOString()\n};\n\nreturn [{ json: stats }];"
+      },
+      "id": "6bf4de07-7cbc-4b6d-ae49-4a3423f98d4d",
+      "name": "Calculate Weekly Statistics",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        2048
+      ],
+      "notes": "Process data and calculate weekly metrics"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 240250192,
+          "mode": "list",
+          "cachedResultName": "Weekly Reports",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=240250192"
+        },
+        "options": {}
+      },
+      "id": "e2385d69-2af1-4d0b-97a5-0e60822a5ef8",
+      "name": "Archive Report Data",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -128,
+        2048
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Save weekly statistics for historical tracking and trend analysis"
+    },
+    {
+      "parameters": {
+        "sendTo": "=arfeenhashmi482@gmail.com",
+        "subject": "=Your Service Appointment Tomorrow",
+        "message": "=<!DOCTYPE html> <html> <head><meta charset=\"UTF-8\"></head> <body style=\"margin:0;padding:0;font-family:Arial,sans-serif;background:#f4f4f4\"> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f4f4f4;padding:20px\"> <tr><td align=\"center\"> <table width=\"700\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#fff;border-radius:8px;box-shadow:0 4px 6px rgba(0,0,0,0.1)\"> <tr><td style=\"background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:40px;text-align:center\"> <h1 style=\"color:#fff;margin:0 0 10px 0;font-size:32px\">📊 Weekly Performance Report</h1> <p style=\"color:#e9d5ff;margin:0;font-size:18px\">Week {{ $now.format('WW') }} - {{ $now.format('YYYY') }}</p> </td></tr> <tr><td style=\"padding:40px\"> <div style=\"background:linear-gradient(135deg,#667eea15 0%,#764ba215 100%);padding:25px;border-radius:8px;margin-bottom:30px;border:2px solid #8b5cf6\"> <h2 style=\"color:#5b21b6;margin-top:0;margin-bottom:15px\">📈 Executive Summary</h2> <p style=\"color:#6b21a8;font-size:16px;line-height:1.8;margin:0\">Comprehensive overview of your business performance for the past week.</p> </div> <h3 style=\"color:#333;margin-bottom:20px\">🎯 Key Metrics</h3> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin-bottom:30px\"> <tr> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:linear-gradient(135deg,#dbeafe 0%,#bfdbfe 100%);padding:25px;border-radius:8px;text-align:center;border:2px solid #3b82f6\"> <div style=\"font-size:48px;font-weight:bold;color:#1e40af;margin-bottom:8px\">{{ $json.total_bookings || '47' }}</div> <div style=\"color:#1e3a8a;font-size:15px;font-weight:600\">Total Bookings</div> <div style=\"color:#10b981;font-size:13px;margin-top:5px\">▲ +12% vs last week</div> </div> </td> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:25px;border-radius:8px;text-align:center;border:2px solid #10b981\"> <div style=\"font-size:48px;font-weight:bold;color:#065f46;margin-bottom:8px\">{{ $json.completed || '38' }}</div> <div style=\"color:#064e3b;font-size:15px;font-weight:600\">Completed</div> <div style=\"color:#065f46;font-size:13px;margin-top:5px\">81% completion</div> </div> </td> <td width=\"32%\" style=\"padding:5px\"> <div style=\"background:linear-gradient(135deg,#fef3c7 0%,#fde68a 100%);padding:25px;border-radius:8px;text-align:center;border:2px solid #f59e0b\"> <div style=\"font-size:48px;font-weight:bold;color:#92400e;margin-bottom:8px\">142k</div> <div style=\"color:#78350f;font-size:15px;font-weight:600\">Revenue (PKR)</div> <div style=\"color:#10b981;font-size:13px;margin-top:5px\">▲ +8%</div> </div> </td> </tr> </table> <h3 style=\"color:#333;margin-top:35px;margin-bottom:20px\">📱 Channel Performance</h3> <table width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"border-collapse:collapse;margin-bottom:30px\"> <thead> <tr style=\"background:linear-gradient(135deg,#667eea 0%,#764ba2 100%)\"> <th style=\"padding:15px;text-align:left;color:#fff;font-size:15px;border:1px solid #8b5cf6\">Channel</th> <th style=\"padding:15px;text-align:center;color:#fff;font-size:15px;border:1px solid #8b5cf6\">Bookings</th> <th style=\"padding:15px;text-align:center;color:#fff;font-size:15px;border:1px solid #8b5cf6\">% Share</th> <th style=\"padding:15px;text-align:center;color:#fff;font-size:15px;border:1px solid #8b5cf6\">Trend</th> </tr> </thead> <tbody> <tr style=\"background:#f8f9fa\"> <td style=\"padding:15px;border:1px solid #dee2e6\"><span style=\"color:#333;font-weight:600\">🌐 Website</span></td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;font-weight:bold;color:#1e40af\">22</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#666\">47%</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#10b981\">▲ +5%</td> </tr> <tr> <td style=\"padding:15px;border:1px solid #dee2e6\"><span style=\"color:#333;font-weight:600\">💬 WhatsApp</span></td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;font-weight:bold;color:#10b981\">15</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#666\">32%</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#10b981\">▲ +8%</td> </tr> <tr style=\"background:#f8f9fa\"> <td style=\"padding:15px;border:1px solid #dee2e6\"><span style=\"color:#333;font-weight:600\">🤖 AI Chatbot</span></td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;font-weight:bold;color:#8b5cf6\">10</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#666\">21%</td> <td style=\"padding:15px;border:1px solid #dee2e6;text-align:center;color:#10b981\">▲ +15%</td> </tr> </tbody> </table> <div style=\"background:linear-gradient(135deg,#d1fae5 0%,#a7f3d0 100%);padding:25px;border-radius:8px;border-left:5px solid #10b981;margin-bottom:20px\"> <h3 style=\"color:#065f46;margin-top:0;margin-bottom:15px\">🎯 Key Insights</h3> <ul style=\"color:#064e3b;line-height:2;margin:0;padding-left:25px\"> <li><strong>AI Chatbot performing well</strong> - 15% growth</li> <li><strong>Peak times:</strong> 9-11 AM and 4-6 PM</li> <li><strong>WhatsApp growing fast</strong> - maintain response times</li> <li><strong>High completion rate (81%)</strong> - excellent!</li> </ul> </div> </td></tr> <tr><td style=\"background:linear-gradient(135deg,#f8f9fa 0%,#e9ecef 100%);padding:25px;text-align:center;border-top:3px solid #667eea\"> <p style=\"margin:0 0 8px 0;color:#333;font-size:15px;font-weight:600\">Expert Services - Weekly Report</p> <p style=\"margin:0;color:#666;font-size:13px\">Report Generated: {{ $now.format('DD MMM YYYY, HH:mm') }}</p> </td></tr> </table> </td></tr></table> </body> </html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -352,
+        2048
+      ],
+      "id": "46a84ac3-8d7d-4146-adef-873e40f15493",
+      "name": "Send Weekly Report Email1",
+      "webhookId": "3e7ca4be-5926-4146-ae36-45c3000b83c9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "list",
+          "cachedResultName": "Expert Services Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1025053171,
+          "mode": "list",
+          "cachedResultName": "Booking whatsapp",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=1025053171"
+        },
+        "options": {}
+      },
+      "id": "8067dc61-b267-470a-be95-e5200c14bdec",
+      "name": "Get All Bookings whatsapp",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [
+        -1024,
+        2048
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      },
+      "notes": "Read complete bookings database"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -800,
+        1952
+      ],
+      "id": "89920bf4-bf5a-4647-81aa-19773191f10f",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "content": "This workflow receives\nbookings from the\nwebsite form and\nautomatically sends\nconfirmation to the\ncustomer.\n\nTrigger: Website Form\n",
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        144
+      ],
+      "typeVersion": 1,
+      "id": "18745a88-1891-4597-adca-ad8003237c9f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "This workflow runs on\na daily schedule.\n\nAuto-triggers every\nday at 6 PM.\n\nChecks tomorrow's\nbookings and sends\nemail reminders to\ncustomers + a full\nsummary to admin",
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1552,
+        1520
+      ],
+      "typeVersion": 1,
+      "id": "9115ab5e-22a8-468f-9826-52f3f8cab4c7",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "\nThis is the weekly\nbusiness report.\n\nEvery Monday 9 AM\nthe owner receives\nfull week stats:\ntotal bookings,\nWhatsApp FAQ count,\nservices breakdown\nand archived data.\n\nTrigger: Schedule\n(Monday 9 AM)\n",
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        2032
+      ],
+      "typeVersion": 1,
+      "id": "bf0d3187-ee2a-42ac-9de5-68db719dca98",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "\nThis workflow runs on\nthe WhatsApp business\nnumber.\n\nFull chat history is\nstored in Google Sheets\nso the AI remembers\nprevious messages.\n\nTrigger: WhatsApp\nWebhook (Meta API)\n",
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        704
+      ],
+      "typeVersion": 1,
+      "id": "e489cc49-801e-477f-9797-6d888baa2f3f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "OK",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        -1024,
+        704
+      ],
+      "id": "cbff8513-ec93-42d5-88f7-c064b91a26c1",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "meta-test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1248,
+        704
+      ],
+      "id": "51737c3b-cf46-4158-9440-b023892b8577",
+      "name": "Webhook",
+      "webhookId": "ca7b8970-ea06-4d3e-ba44-4c378c5773ad"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.body.entry[0].changes[0].value.messages }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -800,
+        704
+      ],
+      "id": "8b74896c-ba12-4583-af65-65dc5f7dc24f",
+      "name": "Check Message Exists1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "phone",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].from }}",
+              "type": "string"
+            },
+            {
+              "id": "e2",
+              "name": "message",
+              "value": "={{ $json.body.entry[0].changes[0].value.messages[0].text.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -576,
+        704
+      ],
+      "id": "75acf86b-b5d9-41ae-bd90-69a8f09564bd",
+      "name": "Extract WhatsApp Data1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1687548094,
+          "mode": "list",
+          "cachedResultName": "Chat History",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=1687548094"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "phone",
+              "lookupValue": "={{ $json.phone }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -352,
+        704
+      ],
+      "id": "33f877f9-52a4-4eac-bfcf-49ae2f53054f",
+      "name": "Load Chat History1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "phone",
+              "value": "={{ $('Extract WhatsApp Data1').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "p2",
+              "name": "message",
+              "value": "={{ $('Extract WhatsApp Data1').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "p3",
+              "name": "history",
+              "value": "={{ $input.first().json.history ?? '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        704
+      ],
+      "id": "331e62a9-2752-4642-920c-64d3f2268c88",
+      "name": "Prepare AI Input1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo-0125",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO-0125"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are \"Arif\" – a friendly and professional customer service agent for Expert Services, a plumbing and electrician service company in Islamabad.\n\nYour job is to answer customer questions about plumbing or electrical services and help them book a technician visit.\n\nIMPORTANT BEHAVIOR RULES:\nReply in English only.\nYour reply must always be ONE short natural human-like sentence.\nDo NOT use line breaks.\nDo NOT use emojis.\nDo not do long free chatting.\nBe polite like a real human support agent.\nDo not repeat the same reply every time.\nAlways guide the conversation towards solving the customer’s plumbing or electrical issue or booking a service.\n\nGREETING RULE:\nIf the customer sends greetings like:\nhi\nhello\nhey\ngood morning\ngood evening\nhow are you\n\nReply politely like a human agent and offer help.\n\nExample replies:\nHello! How can I help you today?\nHi there! How can I assist you today?\nI'm doing well, thank you. How can I help you today?\n\nSet type = \"faq\".\n\nYOUR JOB:\n\n1. FAQ\nIf the customer asks about services, problems, price, areas, availability, or work details → answer normally.\nSet type = \"faq\".\n\n2. BOOKING REQUEST\nIf customer says things like:\nbook service\nneed plumber\nneed electrician\nsend technician\nschedule visit\ncome fix problem\n\nReply exactly:\n\nTo book please fill and send: Name: [name] | Email: [email] | Service: [plumbing/electrical] | Problem: [problem] | Address: [address] | Date: [date] | Time: [time] - Just fill and send back!\n\nSet type = \"faq\".\n\n3. FORM RECEIVED\nIf the customer message contains:\nName:\nEmail:\nService:\nProblem:\nAddress:\nDate:\nTime:\n\nExtract the details and reply:\n\nPlease confirm - Name: X, Email: X, Service: X, Problem: X, Address: X, Date: X, Time: X. Reply YES to confirm.\n\nSet type = \"confirm_booking\".\n\n4. CONFIRMATION\nIf the customer replies with:\nyes\nyes to confirm\nconfirm\nok\nhaan\nji\ndone\n\nSet type = \"booking\".\n\nReply exactly:\n\nBooking confirmed! Our team will contact you shortly. Thank you for choosing Expert Services!\n\nSERVICE RULES:\n\nIf the customer asks how to fix something:\nExplain politely that the technician needs to inspect the issue to give the correct solution.\n\nIf the customer asks price:\nExplain that price depends on the work and is confirmed after inspection.\n\nIf the customer message is unclear:\nAsk them to describe the plumbing or electrical issue.\n\nIf the customer asks unrelated questions:\nPolitely guide them back to plumbing or electrical services.\n\nBOOKING MEMORY RULE (VERY IMPORTANT):\n\nWhen extracting booking details, ALWAYS use the information from the most recent user message.\n\nNEVER reuse booking details from older messages in the chat history.\n\nChat history is only for understanding conversation context, not for extracting booking fields.\n\nIf the user sends a confirmation message such as:\nyes\nyes to confirm\nconfirm\nok\ndone\nji\nhaan\n\nDO NOT extract booking details again.\n\nSimply return type = \"booking\".\n\nCRITICAL OUTPUT RULE (VERY IMPORTANT):\n\nYou must ALWAYS return ONLY valid JSON.\nNever return normal text.\nNever return explanations.\nNever return text outside JSON.\n\nAlways use this exact JSON structure:\n\n{\"type\":\"faq\",\"reply\":\"\",\"name\":\"\",\"email\":\"\",\"service\":\"\",\"problem\":\"\",\"address\":\"\",\"date\":\"\",\"time\":\"\"}\n\nThe reply text must be placed inside the \"reply\" field.\n\nExample correct output:\n\n{\"type\":\"faq\",\"reply\":\"Hello! How can I help you today?\",\"name\":\"\",\"email\":\"\",\"service\":\"\",\"problem\":\"\",\"address\":\"\",\"date\":\"\",\"time\":\"\"}\n\nNever send text like this:\n\nHello! How can I help you today?\n\nPLUMBING FAQs\n\nWhat plumbing services do you offer?\nWe provide leak fixing, pipe repair, drain cleaning, tap replacement, geyser installation, bathroom fitting, toilet repair, water tank cleaning, pressure pump installation, and emergency plumbing services.\n\nDo you fix water leakage?\nYes we repair all types of water leakage including pipes, taps, bathrooms, roofs, and underground lines.\n\nDo you install geysers?\nYes we install and repair electric, gas, and solar geysers.\n\nDo you unblock drains?\nYes we unblock kitchen drains, bathroom drains, and sewage lines.\n\nDo you repair toilets?\nYes we fix blockage, leakage, flush issues, and complete toilet installation.\n\nDo you fix low water pressure?\nYes we diagnose and fix low water pressure problems.\n\nDo you install water tanks?\nYes we install and repair overhead and underground water tanks.\n\nDo you install pressure pumps?\nYes we install booster and pressure pumps for homes.\n\nDo you fix underground pipe leakage?\nYes we detect and repair underground pipe leakage.\n\nDo you install kitchen sinks?\nYes we install and repair all types of kitchen sinks.\n\nDo you fix roof leakage?\nYes we fix roof leakage and provide waterproofing.\n\nDo you repair shower problems?\nYes we repair leaking showers, mixers, and pressure problems.\n\nDo you handle sewage problems?\nYes we fix sewage blockage and drainage problems.\n\nELECTRICAL FAQs\n\nWhat electrical services do you offer?\nWe provide wiring, fan installation, AC installation, circuit breaker repair, inverter setup, solar installation, CCTV installation, lighting installation, switch replacement, and complete electrical maintenance.\n\nDo you do house wiring?\nYes we do new wiring, rewiring, and electrical repairs.\n\nDo you install fans?\nYes we install ceiling fans, wall fans, exhaust fans, and industrial fans.\n\nDo you install AC?\nYes we install and service all types of air conditioners.\n\nDo you fix short circuits?\nYes we diagnose and repair electrical faults and short circuits.\n\nDo you install CCTV cameras?\nYes we install complete CCTV systems for homes and offices.\n\nDo you setup inverter or UPS?\nYes we install and configure inverter and UPS systems.\n\nDo you install solar panels?\nYes we install complete solar power systems.\n\nDo you repair panel boards?\nYes we repair and upgrade electrical panel boards.\n\nDo you fix tripping issues?\nYes we diagnose and fix circuit breaker tripping.\n\nDo you install switches and sockets?\nYes we install and replace electrical switches and sockets.\n\nDo you install exhaust fans?\nYes we install exhaust fans in kitchens and bathrooms.\n\nDo you fix flickering lights?\nYes we fix flickering lights caused by wiring or voltage issues.\n\nGENERAL FAQs\n\nWhere are you located?\nWe are based in Islamabad and provide services in all sectors including F, G, I, E sectors, DHA, Bahria Town, PWD, and Rawalpindi.\n\nWhat are your working hours?\nWe operate from 8 AM to 10 PM daily and emergency services are available 24 hours.\n\nHow fast can you come?\nNormally within 2 to 4 hours and emergencies within 1 hour.\n\nDo you provide warranty?\nYes we provide warranty on our work.\n\nHow much do you charge?\nService charges start from PKR 500 depending on the work.\n\nDo you serve Rawalpindi?\nYes we provide services in Rawalpindi including Saddar and Bahria Town.\n\nDo you work on weekends?\nYes we work 7 days a week including weekends and holidays.\n\nAre your technicians experienced?\nYes all technicians have at least 5 years of experience.\n\nDo you provide invoice?\nYes we provide complete receipt and invoice for all work.",
+              "role": "system"
+            },
+            {
+              "content": "=Conversation History:\n{{ $('Prepare AI Input1').item.json.history }}\n\nCurrent Customer Message:\n{{ $('Prepare AI Input1').item.json.message }}"
+            }
+          ]
+        },
+        "options": {
+          "maxTokens": 500,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        96,
+        704
+      ],
+      "id": "92df5a32-4ce1-4e33-b484-fb7f4b5d5618",
+      "name": "AI Analyzer1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "vzQSSfr2RdA2uzB0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b1",
+              "leftValue": "={{ $json.ai_type }}",
+              "rightValue": "booking",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        704
+      ],
+      "id": "d7864f75-6b12-4881-aaeb-4c6a36346755",
+      "name": "Booking or FAQ1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v18.0/919623274577220/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n \"messaging_product\": \"whatsapp\",\n \"recipient_type\": \"individual\",\n \"to\": \"{{ $json.phone }}\",\n \"type\": \"text\",\n \"text\": {\n   \"body\": \"{{ $json.ai_reply || 'How can I help you today?' }}\"\n }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        800
+      ],
+      "id": "09c728d9-32a2-4cda-90a6-23b6e6c78de0",
+      "name": "Send WhatsApp Reply1",
+      "alwaysOutputData": false,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xHhGy5tHTK7UnEED",
+          "name": "new meta msg facebook permanent token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1025053171,
+          "mode": "list",
+          "cachedResultName": "Booking whatsapp",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit#gid=1025053171"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "booking_id": "=WA-{{$now.format('yyyyMMddHHmmss')}}",
+            "customer_name": "={{ $('Parse AI Output').item.json.ai_name }}",
+            "service_type": "={{ $('Parse AI Output').item.json.ai_service }}",
+            "preferred_date": "={{ $('Parse AI Output').item.json.ai_date }}",
+            "preferred_time": "={{ $('Parse AI Output').item.json.ai_time }}",
+            "customer_phone": "={{ $('Extract WhatsApp Data1').item.json.phone }}",
+            "customer_email": "={{ $('Parse AI Output').item.json.ai_email }}",
+            "source": "=whatsapp",
+            "address": "={{ $('Parse AI Output').item.json.ai_address }}",
+            "problem_description": "={{ $('Parse AI Output').item.json.ai_problem }}",
+            "status": "=pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "booking_id",
+              "displayName": "booking_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "service_type",
+              "displayName": "service_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "problem_description",
+              "displayName": "problem_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "address",
+              "displayName": "address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preferred_date",
+              "displayName": "preferred_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "preferred_time",
+              "displayName": "preferred_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_phone",
+              "displayName": "customer_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_type",
+              "displayName": "ai_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_reply",
+              "displayName": "ai_reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_name",
+              "displayName": "ai_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_service",
+              "displayName": "ai_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_problem",
+              "displayName": "ai_problem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_address",
+              "displayName": "ai_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_date",
+              "displayName": "ai_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_time",
+              "displayName": "ai_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_email",
+              "displayName": "ai_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1360,
+        592
+      ],
+      "id": "7b7580de-c353-4e7c-b465-8d7cd62c9770",
+      "name": "Save Booking to Sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1687548094,
+          "mode": "list",
+          "cachedResultName": "Chat History"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "phone": "={{ $('Extract WhatsApp Data1').item.json.phone }}",
+            "history": "={{ ($('Prepare AI Input1').item.json.history || '') + '\\nCustomer: ' + $('Extract WhatsApp Data1').item.json.message + '\\nArif: ' + $json.ai_reply }}",
+            "last_updated": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}"
+          },
+          "matchingColumns": [
+            "phone"
+          ],
+          "schema": [
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "history",
+              "displayName": "history",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "last_updated",
+              "displayName": "last_updated",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1120,
+        800
+      ],
+      "id": "6e9e1081-981e-42fd-8f14-bade1a7f347b",
+      "name": "Save Chat History",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v18.0/919623274577220/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"recipient_type\": \"individual\",\n  \"to\": \"{{ $('Parse AI Output').item.json.phone }}\",\n  \"type\": \"text\",\n  \"text\": {\n    \"body\": \"{{ $('Parse AI Output').item.json.ai_reply }}\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        896,
+        624
+      ],
+      "id": "14e1f5b1-e7d3-465f-ae90-a8a5d12eaa73",
+      "name": "Send Booking Confirmation",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "xHhGy5tHTK7UnEED",
+          "name": "new meta msg facebook permanent token"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "pa1",
+              "name": "ai_type",
+              "value": "={{ JSON.parse($json.message.content).type }}",
+              "type": "string"
+            },
+            {
+              "id": "pa2",
+              "name": "ai_reply",
+              "value": "={{ JSON.parse($json.message.content).reply }}",
+              "type": "string"
+            },
+            {
+              "id": "pa3",
+              "name": "ai_name",
+              "value": "={{ JSON.parse($json.message.content).name }}",
+              "type": "string"
+            },
+            {
+              "id": "pa4",
+              "name": "ai_service",
+              "value": "={{ JSON.parse($json.message.content).service }}",
+              "type": "string"
+            },
+            {
+              "id": "pa5",
+              "name": "ai_problem",
+              "value": "={{ JSON.parse($json.message.content).problem }}",
+              "type": "string"
+            },
+            {
+              "id": "pa6",
+              "name": "ai_address",
+              "value": "={{ JSON.parse($json.message.content).address }}",
+              "type": "string"
+            },
+            {
+              "id": "pa7",
+              "name": "ai_date",
+              "value": "={{ JSON.parse($json.message.content).date }}",
+              "type": "string"
+            },
+            {
+              "id": "pa8",
+              "name": "ai_time",
+              "value": "={{ JSON.parse($json.message.content).time }}",
+              "type": "string"
+            },
+            {
+              "id": "pa9",
+              "name": "phone",
+              "value": "={{ $('Extract WhatsApp Data1').item.json.phone }}",
+              "type": "string"
+            },
+            {
+              "id": "pa10",
+              "name": "message",
+              "value": "={{ $('Extract WhatsApp Data1').item.json.message }}",
+              "type": "string"
+            },
+            {
+              "id": "7023fb67-84d9-4dca-829a-f14e958d772e",
+              "name": "ai_email",
+              "value": "={{ $json.message.content.includes('\"email\"') ? JSON.parse($json.message.content).email : \"\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        704
+      ],
+      "id": "498d6632-2102-4234-ab68-3ca3247e1c26",
+      "name": "Parse AI Output"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot-message",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1232,
+        1120
+      ],
+      "id": "d05c3e9b-c0fd-45d3-a136-6796394b35c8",
+      "name": "Chatbot Webhook",
+      "webhookId": "2a2cca2d-e2f9-4f05-a4a4-538a5a259372"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-3.5-turbo-0125",
+          "mode": "list",
+          "cachedResultName": "GPT-3.5-TURBO-0125"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are \"Arif\", a friendly and professional customer support agent for Expert Services, a plumbing and electrical services company based in Islamabad.\n\nYou talk to customers like a real human support agent and help them solve their plumbing or electrical problems or book a technician.\n\nIMPORTANT RULES\n\nReply in English only.\nReply naturally like a real support agent.\nKeep replies short and clear.\nReply in ONE single line only.\nNEVER use \\n.\nDo NOT use emojis.\nDo NOT sound robotic.\nDo NOT repeat long lists unless needed.\n\nAlways guide the customer toward solving their issue or booking a service.\n\nReturn ONLY valid JSON.\nDo not add any explanation or text outside JSON.\nDo not use backticks.\n\n---\n\nYOUR TASKS\n\n1. GREETINGS\n\nIf the user says something like:\n\nhi  \nhello  \nhey  \ngood morning  \ngood evening  \nhow are you  \n\nReply politely and offer help.\n\nExamples:\n\nHello! How can I help you today?  \nHi there! What plumbing or electrical issue can I help you with?  \nHello! Do you need a plumber or electrician today?\n\nSet type = \"faq\".\n\n---\n\n2. FAQ QUESTIONS\n\nIf the user asks any question about services, price, timing, technicians, or areas:\n\nAnswer clearly and naturally using the knowledge below.\n\nSet type = \"faq\".\n\n---\n\n3. BOOKING REQUEST\n\nIf the user says things like:\n\nbook service  \nneed plumber  \nneed electrician  \nsend technician  \nschedule visit  \ncome fix problem  \nI want to book  \ncan you come  \n\nSend the booking form.\n\nSet type = \"faq\".\n\nReply EXACTLY with:\n\nTo book please fill and send: Name: [name] | Phone: [phone] | Email: [email] | Service: [plumbing/electrical] | Problem: [problem] | Address: [address] | Date: [date] | Time: [time] - Just fill and send back!\n\n---\n\n4. BOOKING FORM RECEIVED\n\nIf the user message contains booking details like name, phone, email, service, problem, address, date, and time in ANY format (even if slightly incorrect or missing brackets), then treat it as a booking form.\n\nExtract all values intelligently even if formatting is not perfect.\n\nPhone and Email are REQUIRED.\n\nIf Phone is missing:\nReply: Please add your Phone number to complete the booking.\nSet type = \"faq\".\n\nIf Email is missing:\nReply: Please add your Email address to complete the booking.\nSet type = \"faq\".\n\nIf all required information exists:\n\nReply EXACTLY:\nPlease confirm - Name: X, Phone: X, Email: X, Service: X, Problem: X, Address: X, Date: X, Time: X. Reply YES to confirm.\n\nSet type = \"confirm_booking\".\n\nAlso return all extracted values.\n---\n\n5. CONFIRMATION\n\nIf the user message contains any of these words:\nyes\nconfirm\nyes confirm\nok\nokay\ndone\n\nTHEN ALWAYS treat it as booking confirmation.\n\nSet type = \"booking\".\n\nReply EXACTLY:\nBooking confirmed! Our team will contact you shortly. Thank you for choosing Expert Services!\n\nReturn the SAME values from the booking form.\n\nNever return a FAQ response for these messages.\n\n---\n\nIMPORTANT\n\n\"type\" must always be one of:\n\nfaq  \nconfirm_booking  \nbooking  \n\n---\n\nRETURN JSON FORMAT\n\n{\"type\":\"faq\",\"reply\":\"\",\"name\":\"\",\"phone\":\"\",\"email\":\"\",\"service\":\"\",\"problem\":\"\",\"address\":\"\",\"date\":\"\",\"time\":\"\"}\n\n---\n\nPLUMBING FAQs\n\nWhat plumbing services do you offer?  \nWe provide pipe repair, leak fixing, drain cleaning, tap replacement, geyser installation, bathroom fittings, toilet repair, water tank cleaning, pressure pump installation, waterproofing, and emergency plumbing services.\n\nDo you fix water leakage?  \nYes we repair all types of water leakage including pipe leakage, roof leakage, bathroom leakage, underground pipe leakage, and tap leakage.\n\nDo you unblock drains?  \nYes we unblock kitchen drains, bathroom drains, toilet drains, and outdoor drainage lines.\n\nDo you repair toilets?  \nYes we fix toilet blockage, flush problems, leakage, seat replacement, and full toilet installation.\n\nDo you install geysers or water heaters?  \nYes we install and repair electric, gas, and solar geysers.\n\nDo you fix low water pressure?  \nYes we diagnose and fix low pressure caused by blocked pipes, faulty valves, or pump issues.\n\nDo you install pressure pumps?  \nYes we install and repair booster pumps and pressure pumps.\n\nDo you replace old pipes?  \nYes we replace damaged or rusted pipes including underground piping systems.\n\nDo you fix roof leakage?  \nYes we fix roof leakage and provide waterproofing solutions.\n\nDo you install kitchen sinks?  \nYes we install and repair kitchen sinks and drainage systems.\n\nDo you clean water tanks?  \nYes we clean underground and overhead water tanks professionally.\n\nDo you install water filters?  \nYes we install all types of water filtration and purification systems.\n\nDo you repair shower problems?  \nYes we fix low pressure showers, leakage, and mixer valve issues.\n\nDo you fix sewage blockage?  \nYes we handle sewage blockage and drainage overflow problems.\n\nDo you install overhead tanks?  \nYes we install and repair overhead water tanks.\n\nDo you fix underground pipe leakage?  \nYes we use professional tools to detect and repair underground pipe leaks.\n\n---\n\nELECTRICAL FAQs\n\nWhat electrical services do you provide?  \nWe provide electrical wiring, fan installation, AC installation, circuit breaker repair, inverter and UPS installation, solar panel installation, CCTV installation, lighting installation, and electrical maintenance.\n\nDo you do house wiring?  \nYes we provide complete new wiring and rewiring for homes and offices.\n\nDo you install ceiling fans?  \nYes we install ceiling fans, wall fans, exhaust fans, and industrial fans.\n\nDo you install AC units?  \nYes we install and service all types of AC including split and inverter AC.\n\nDo you fix electrical short circuits?  \nYes we diagnose and repair short circuits and electrical faults.\n\nDo you install CCTV cameras?  \nYes we install complete CCTV systems for homes and offices.\n\nDo you setup inverter or UPS?  \nYes we install and configure inverter and UPS systems with batteries.\n\nDo you install solar panels?  \nYes we install complete solar systems including hybrid and off grid systems.\n\nDo you repair panel boards?  \nYes we repair and replace electrical panel boards and distribution boards.\n\nDo you fix tripping issues?  \nYes we diagnose and fix breaker tripping and overload problems.\n\nDo you replace switches and sockets?  \nYes we install and replace switches, sockets, and electrical outlets.\n\nDo you install doorbells?  \nYes we install wired and wireless doorbells.\n\nDo you fix flickering lights?  \nYes we repair flickering lights caused by loose wiring or faulty switches.\n\nDo you install exhaust fans?  \nYes we install exhaust fans in kitchens and bathrooms.\n\nDo you repair electric motors?  \nYes we repair motors for pumps and other equipment.\n\nDo you install security systems?  \nYes we install CCTV cameras, alarm systems, and motion sensors.\n\n---\n\nGENERAL FAQs\n\nWhere are you located?  \nWe are based in Islamabad and serve all sectors including F, G, I, E sectors, Bahria Town, DHA, PWD, Gulberg, and Rawalpindi.\n\nWhat are your working hours?  \nWe operate from 8 AM to 10 PM daily and emergency services are available 24/7.\n\nHow fast can you come?  \nNormal bookings are completed within 2 to 4 hours while emergency visits can arrive within 1 hour.\n\nHow much do you charge?  \nService charges start from PKR 500 depending on the job. Final cost is confirmed after inspection.\n\nDo you provide warranty?  \nYes we provide warranty on our work depending on the service.\n\nAre your technicians experienced?  \nYes all technicians are verified and have at least 5 years of experience.\n\nDo you give invoice or receipt?  \nYes we provide a full receipt or invoice after completing the job.\n\nCan I cancel a booking?  \nYes you can cancel or reschedule at least 1 hour before your appointment.\n\nDo you work on weekends?  \nYes we work 7 days a week including weekends and holidays.\n\nDo you serve Rawalpindi?  \nYes we serve Rawalpindi including Saddar, Chaklala, and Bahria Town phases.\n\nDo technicians bring tools?  \nYes all technicians arrive fully equipped with professional tools.",
+              "role": "system"
+            },
+            {
+              "content": "=Conversation History:\n{{ $input.first().json.conversation_history }}\n\nCurrent Customer Message:\n{{ $input.first().json.user_message }}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -784,
+        1120
+      ],
+      "id": "1d777a06-7d1a-4dfe-b8fc-335843135fb7",
+      "name": "AI Brain",
+      "credentials": {
+        "openAiApi": {
+          "id": "vzQSSfr2RdA2uzB0",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.ai_type }}",
+              "rightValue": "confirm_booking",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        1120
+      ],
+      "id": "4d963f26-a074-4952-bcd8-17840037fac3",
+      "name": "Is Booking?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b1",
+              "name": "booking_id",
+              "value": "={{ 'CHAT-' + $now.format('yyyyMMddHHmmss') }}",
+              "type": "string"
+            },
+            {
+              "id": "b2",
+              "name": "customer_name",
+              "value": "={{ $json.ai_name }}",
+              "type": "string"
+            },
+            {
+              "id": "b3",
+              "name": "customer_phone",
+              "value": "={{ $json.ai_phone }}",
+              "type": "string"
+            },
+            {
+              "id": "b4",
+              "name": "customer_email",
+              "value": "={{ $json.ai_email }}",
+              "type": "string"
+            },
+            {
+              "id": "b5",
+              "name": "service_type",
+              "value": "={{ $json.ai_service }}",
+              "type": "string"
+            },
+            {
+              "id": "b6",
+              "name": "problem_description",
+              "value": "={{ $json.ai_problem }}",
+              "type": "string"
+            },
+            {
+              "id": "b7",
+              "name": "address",
+              "value": "={{ $json.ai_address }}",
+              "type": "string"
+            },
+            {
+              "id": "b8",
+              "name": "preferred_date",
+              "value": "={{ $json.ai_date }}",
+              "type": "string"
+            },
+            {
+              "id": "b9",
+              "name": "preferred_time",
+              "value": "={{ $json.ai_time }}",
+              "type": "string"
+            },
+            {
+              "id": "b10",
+              "name": "ai_reply",
+              "value": "={{ $json.ai_type === 'booking'\n? 'Booking confirmed! Our team will contact you shortly. Thank you for choosing Expert Services!'\n: $json.ai_reply }}",
+              "type": "string"
+            },
+            {
+              "id": "b11",
+              "name": "booking_date",
+              "value": "={{ $now.format('yyyy-MM-dd HH:mm:ss') }}",
+              "type": "string"
+            },
+            {
+              "id": "b12",
+              "name": "status",
+              "value": "pending",
+              "type": "string"
+            },
+            {
+              "id": "b13",
+              "name": "source",
+              "value": "Website Chatbot",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        16,
+        1024
+      ],
+      "id": "72fb9edc-fff6-4d72-be4a-db3864945ea3",
+      "name": "Format Booking"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Bookings"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "booking_id": "=",
+            "customer_name": "={{ $json.customer_name }}",
+            "customer_phone": "={{ $json.customer_phone }}",
+            "customer_email": "={{ $json.customer_email }}",
+            "service_type": "={{ $json.service_type }}",
+            "problem_description": "={{ $json.problem_description }}",
+            "preferred_date": "={{ $json.preferred_date }}",
+            "preferred_time": "={{ $json.preferred_time }}",
+            "booking_date": "={{ $json.booking_date }}",
+            "status": "={{ $json.status }}",
+            "source": "={{ $json.source }}",
+            " booking_id": "={{ $json.booking_id }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "booking_id",
+              "displayName": "booking_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_name",
+              "displayName": "customer_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_phone",
+              "displayName": "customer_phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "customer_email",
+              "displayName": "customer_email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "service_type",
+              "displayName": "service_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_date",
+              "displayName": "preferred_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_time",
+              "displayName": "preferred_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "problem_description",
+              "displayName": "problem_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "booking_date",
+              "displayName": "booking_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "source",
+              "displayName": "source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "headers",
+              "displayName": "headers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "params",
+              "displayName": "params",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "body",
+              "displayName": "body",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "webhookUrl",
+              "displayName": "webhookUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "executionMode",
+              "displayName": "executionMode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": " booking_id",
+              "displayName": " booking_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_type",
+              "displayName": "ai_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_reply",
+              "displayName": "ai_reply",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_name",
+              "displayName": "ai_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_service",
+              "displayName": "ai_service",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_problem",
+              "displayName": "ai_problem",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_address",
+              "displayName": "ai_address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_date",
+              "displayName": "ai_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ai_time",
+              "displayName": "ai_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "phone",
+              "displayName": "phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        240,
+        1024
+      ],
+      "id": "b6d0267f-0117-47f2-bfcd-15b70863b82f",
+      "name": "Save Booking",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ggsVg4FLa8RXUsTM",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "arfeenhashmi75@gmail.com",
+        "subject": "=New Booking - {{ $json.booking_id }}",
+        "message": "=<!DOCTYPE html><html><body style=\"font-family:Arial,sans-serif;background:#f4f4f4;padding:20px\"><div style=\"max-width:600px;margin:0 auto;background:#fff;border-radius:8px;padding:30px\"><h2 style=\"color:#8b5cf6\">New Booking Alert!</h2><p>A customer completed booking through the AI Chatbot.</p><table style=\"width:100%;border-collapse:collapse\"><tr><td style=\"padding:8px;font-weight:bold;color:#333\">Booking ID:</td><td style=\"padding:8px;color:#666\">{{ $json.booking_id }}</td></tr><tr style=\"background:#f9f9f9\"><td style=\"padding:8px;font-weight:bold;color:#333\">Name:</td><td style=\"padding:8px;color:#666\">{{ $json.customer_name }}</td></tr><tr><td style=\"padding:8px;font-weight:bold;color:#333\">Phone:</td><td style=\"padding:8px;color:#666\">{{ $json.customer_phone }}</td></tr><tr <tr style=\"background:#f9f9f9\">\n<td style=\"padding:8px;font-weight:bold;color:#333\">Email:</td>\n<td style=\"padding:8px;color:#666\">{{ $json.customer_email }}</td>\n</tr> style=\"background:#f9f9f9\"><td style=\"padding:8px;font-weight:bold;color:#333\">Service:</td><td style=\"padding:8px;color:#666\">{{ $json.service_type }}</td></tr><tr><td style=\"padding:8px;font-weight:bold;color:#333\">Problem:</td><td style=\"padding:8px;color:#666\">{{ $json.problem_description }}</td></tr><tr style=\"background:#f9f9f9\"><td style=\"padding:8px;font-weight:bold;color:#333\">Address:</td><td style=\"padding:8px;color:#666\">{{ $json.address }}</td></tr><tr><td style=\"padding:8px;font-weight:bold;color:#333\">Date:</td><td style=\"padding:8px;color:#666\">{{ $json.preferred_date }}</td></tr><tr style=\"background:#f9f9f9\"><td style=\"padding:8px;font-weight:bold;color:#333\">Time:</td><td style=\"padding:8px;color:#666\">{{ $json.preferred_time }}</td></tr></table><p style=\"margin-top:20px;color:#888;font-size:12px\">Booking Date: {{ $json.booking_date }}</p></div></body></html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        464,
+        1024
+      ],
+      "id": "ccee7d28-80d9-4034-ab5d-fb4d622c60ff",
+      "name": "Email Admin",
+      "webhookId": "bf1ed447-9cb4-4eee-a551-de455a5a952d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TPSTFzWAzT1sX8N5",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  \"response\": $json.ai_type === \"booking\"\n    ? \"Booking confirmed! Our team will contact you shortly. Thank you for choosing Expert Services!\"\n    : \"Please confirm your booking details. Reply YES to confirm.\",\n  \"booking_complete\": $json.ai_type === \"booking\",\n  \"booking_id\": $('Format Booking').item.json.booking_id || \"\"\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        1024
+      ],
+      "id": "3adfa023-836d-4261-a05d-568fb2b3e9b6",
+      "name": "Respond Booking"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ \"response\": $json.ai_reply, \"booking_complete\": false, \"booking_id\": null }) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        16,
+        1216
+      ],
+      "id": "6046b021-08c5-4053-8287-8da6177734aa",
+      "name": "Respond FAQ"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "session_id",
+              "value": "={{ $json.body.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e2",
+              "name": "user_message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "e3",
+              "name": "conversation_history",
+              "value": "={{ $json.body.history || '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1008,
+        1120
+      ],
+      "id": "8ad515f1-9bce-477c-b04f-8d1488e2ee71",
+      "name": "Extract Chat Data1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "p1",
+              "name": "ai_type",
+              "value": "={{ JSON.parse($json.message.content).type }}",
+              "type": "string"
+            },
+            {
+              "id": "p2",
+              "name": "ai_reply",
+              "value": "={{ JSON.parse($json.message.content).reply }}",
+              "type": "string"
+            },
+            {
+              "id": "p3",
+              "name": "ai_name",
+              "value": "={{ JSON.parse($json.message.content).name }}",
+              "type": "string"
+            },
+            {
+              "id": "p4",
+              "name": "ai_service",
+              "value": "={{ JSON.parse($json.message.content).service }}",
+              "type": "string"
+            },
+            {
+              "id": "p5",
+              "name": "ai_problem",
+              "value": "={{ JSON.parse($json.message.content).problem }}",
+              "type": "string"
+            },
+            {
+              "id": "p6",
+              "name": "ai_address",
+              "value": "={{ JSON.parse($json.message.content).address }}",
+              "type": "string"
+            },
+            {
+              "id": "p7",
+              "name": "ai_date",
+              "value": "={{ JSON.parse($json.message.content).date }}",
+              "type": "string"
+            },
+            {
+              "id": "p8",
+              "name": "ai_time",
+              "value": "={{ JSON.parse($json.message.content).time }}",
+              "type": "string"
+            },
+            {
+              "id": "p9",
+              "name": "ai_phone",
+              "value": "={{ JSON.parse($json.message.content).phone }}",
+              "type": "string"
+            },
+            {
+              "id": "p10",
+              "name": "session_id",
+              "value": "={{ $('Extract Chat Data1').item.json.session_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3fd541b6-12c0-4207-bb72-253bb90cbf5c",
+              "name": "ai_phone",
+              "value": "={{ JSON.parse($json.message.content).phone }}",
+              "type": "string"
+            },
+            {
+              "id": "b7e01115-ec07-4043-b5b3-71b8d81be0ca",
+              "name": "ai_email",
+              "value": "={{ JSON.parse($json.message.content).email }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -432,
+        1120
+      ],
+      "id": "45bb164c-4589-4d60-a38a-8834bf5348a4",
+      "name": "Parse AI Output1"
+    },
+    {
+      "parameters": {
+        "content": "This workflow powers\nthe website chatbot.\nAI agent 'Arif' uses\nGPT-3.5 model.\n\nAnswers plumbing &\nelectrical questions\nand can also take\nbookings directly.\n\nTrigger: Chat Webhook\n",
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        1104
+      ],
+      "typeVersion": 1,
+      "id": "5696c34e-7b9f-4613-8387-dab042e3f5c3",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Website Form Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Booking Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Booking Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Database (Google Sheets)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Database (Google Sheets)1": {
+      "main": [
+        [
+          {
+            "node": "Send Customer Confirmation Email1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Success Response",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Admin Notification Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Filter Tomorrow's Bookings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Bookings websites1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Bookings whatsapp2": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger (6 PM Daily)": {
+      "main": [
+        [
+          {
+            "node": "Get All Bookings websites1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get All Bookings whatsapp2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Tomorrow's Bookings": {
+      "main": [
+        [
+          {
+            "node": "Has Tomorrow Bookings?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Tomorrow Bookings?": {
+      "main": [
+        [
+          {
+            "node": "Has Email?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Admin Summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Email?": {
+      "main": [
+        [
+          {
+            "node": "Send Email Reminder1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Reminder1": {
+      "main": [
+        [
+          {
+            "node": "Send Admin Summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Bookings website1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger (Monday 9 AM)": {
+      "main": [
+        [
+          {
+            "node": "Get All Bookings website1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get WhatsApp FAQ Logs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get All Bookings whatsapp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get WhatsApp FAQ Logs": {
+      "main": [
+        [
+          {
+            "node": "Calculate Weekly Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Weekly Statistics": {
+      "main": [
+        [
+          {
+            "node": "Send Weekly Report Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Weekly Report Email1": {
+      "main": [
+        [
+          {
+            "node": "Archive Report Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Bookings whatsapp": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Calculate Weekly Statistics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        [
+          {
+            "node": "Check Message Exists1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Message Exists1": {
+      "main": [
+        [
+          {
+            "node": "Extract WhatsApp Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract WhatsApp Data1": {
+      "main": [
+        [
+          {
+            "node": "Load Chat History1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Chat History1": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input1": {
+      "main": [
+        [
+          {
+            "node": "AI Analyzer1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Analyzer1": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Booking or FAQ1": {
+      "main": [
+        [
+          {
+            "node": "Send Booking Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send WhatsApp Reply1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send WhatsApp Reply1": {
+      "main": [
+        [
+          {
+            "node": "Save Chat History",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Booking Confirmation": {
+      "main": [
+        [
+          {
+            "node": "Save Booking to Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output": {
+      "main": [
+        [
+          {
+            "node": "Booking or FAQ1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatbot Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Chat Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Brain": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Output1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Booking?": {
+      "main": [
+        [
+          {
+            "node": "Format Booking",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond FAQ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Booking": {
+      "main": [
+        [
+          {
+            "node": "Save Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Booking": {
+      "main": [
+        [
+          {
+            "node": "Email Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Admin": {
+      "main": [
+        [
+          {
+            "node": "Respond Booking",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Chat Data1": {
+      "main": [
+        [
+          {
+            "node": "AI Brain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Output1": {
+      "main": [
+        [
+          {
+            "node": "Is Booking?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "executionTimeout": -1
+  },
+  "versionId": "a905e587-d1bf-4a22-ba2d-c9830547714e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6d3fa80c494c7f485630d0e9f81fd932f1468eb361c761c43dda314fa3beb978"
+  },
+  "id": "qznUiSh6bsL5V2b3N3ez8",
+  "tags": []
+}
