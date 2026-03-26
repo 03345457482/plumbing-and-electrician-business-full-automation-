@@ -11,7 +11,7 @@ Use the links below to explore the live project:
 * 🌐 **Live Website:** https://arfeenix.site/
 * 🎬 **Demo Video:** https://drive.google.com/file/d/1KZWWX3gUOyLHQY3sxd_wPj93Fob2RphC/view?usp=drive_link
 * 📊 **Business Presentation:** https://docs.google.com/presentation/d/1kjbJdLHI1M5zHMpB8TBUsmKG3AbhOBjI/edit?usp=drive_link&ouid=110744459534948677879&rtpof=true&sd=true
-
+**Google Sheet**https://docs.google.com/spreadsheets/d/19O6wIK7i4RobIk_8XpCHStzPPmNzBAsg0R1d3v0ZccI/edit?usp=sharing
 ---
 
 ## ✨ Key Automation Benefits
